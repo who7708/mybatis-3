@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!--
+org.apache.ibatis.session.Configuration
+org.apache.ibatis.builder.xml.XMLConfigBuilder.parseConfiguration
+ -->
+<configuration>
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.propertiesElement
+    -->
+    <properties resource="org/apache/my/db.properties">
+        <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+    </properties>
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.settingsAsProperties
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.settingsElement
+    -->
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="multipleResultSetsEnabled" value="true"/>
+        <setting name="useColumnLabel" value="true"/>
+        <setting name="useGeneratedKeys" value="false"/>
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <setting name="defaultStatementTimeout" value="25"/>
+    </settings>
+
+    <!--
+    由此方法对 typeAlias 进行解析
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.typeAliasesElement
+    -->
+    <typeAliases>
+        <!--
+        在类上使用注解也是可以的
+        @Alias("haha")
+        1. 如果没有alias属性,则默认使用类名(class.getSimpleName())作为alias进行注册
+        2. 如果有alias属性,则使用设置的alias进行注册
+        最终alias全部设置为小写,写入map中<alias,class>
+        org.apache.ibatis.type.TypeAliasRegistry.TYPE_ALIASES
+        -->
+        <typeAlias type="org.apache.ibatis.domain.blog.Author"/>
+        <typeAlias alias="Author" type="org.apache.ibatis.domain.blog.Author"/>
+        <typeAlias alias="Blog" type="org.apache.ibatis.domain.blog.Blog"/>
+        <typeAlias alias="Comment" type="org.apache.ibatis.domain.blog.Comment"/>
+        <typeAlias alias="Post" type="org.apache.ibatis.domain.blog.Post"/>
+        <typeAlias alias="Section" type="org.apache.ibatis.domain.blog.Section"/>
+        <typeAlias alias="Tag" type="org.apache.ibatis.domain.blog.Tag"/>
+        <!--
+        找到此包下面的所有类,包括子包下的类,进行注册.
+        前提是解析出来的类不能是匿名类,也不能是接口,更不能是成员类(类中定义的类)
+          if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
+            registerAlias(type);
+          }
+        -->
+        <package name="org.apache.ibatis.domain.blog"/>
+    </typeAliases>
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.typeHandlerElement
+    -->
+    <typeHandlers>
+        <!--
+        功能就是将数据库中的类型转换成java类型
+        -->
+        <typeHandler handler="org.apache.my.TinyIntTypeHandler" jdbcType="TINYINT" javaType="java.lang.Integer"/>
+        <!--
+        等同于在TypeHandler上使用两个注解
+        @MappedTypes(String.class)
+        @MappedJdbcTypes(value={JdbcType.CHAR,JdbcType.VARCHAR}, includeNullJdbcType=true)
+        -->
+        <typeHandler handler="org.apache.ibatis.submitted.typehandler.StringTrimmingTypeHandler" jdbcType="CHAR"
+                     javaType="java.lang.String"/>
+        <typeHandler handler="org.apache.ibatis.submitted.typehandler.StringTrimmingTypeHandler" jdbcType="VARCHAR"
+                     javaType="java.lang.String"/>
+        <!--
+        如果直接解析包的话，且没有相应的 @MappedTypes 相关注解，则一定要有无参构造方法
+        -->
+        <!--<package name="a.b.c"/>-->
+    </typeHandlers>
+
+    <!--
+    调用此方法进行解析插件
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.pluginElement
+    解析完成后，放入org.apache.ibatis.session.Configuration.addInterceptor
+    -->
+    <plugins>
+        <!--
+        必须有元参构造函数，因为会调用class.newInstance()，进行初始化
+        -->
+        <plugin interceptor="org.apache.my.MybatisInterceptor">
+            <!--
+            org.apache.ibatis.parsing.XNode.getChildrenAsProperties
+            -->
+            <property name="interceptor_key" value="interceptor_value"/>
+        </plugin>
+    </plugins>
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.objectFactoryElement
+    -->
+    <!--<objectFactory type="">-->
+    <!--    <property name="" value=""/>-->
+    <!--</objectFactory>-->
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.objectWrapperFactoryElement
+    -->
+    <!--<objectWrapperFactory type=""/>-->
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.reflectorFactoryElement
+    -->
+    <!--<reflectorFactory type=""/>-->
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.environmentsElement
+    -->
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC">
+                <property name="" value=""/>
+            </transactionManager>
+            <dataSource type="UNPOOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.databaseIdProviderElement
+    -->
+    <!--<databaseIdProvider type="">-->
+    <!--    <property name="" value=""/>-->
+    <!--</databaseIdProvider>-->
+
+    <!--
+    org.apache.ibatis.builder.xml.XMLConfigBuilder.mapperElement
+    -->
+    <mappers>
+        <!--
+        使用此方法进行 mapper 解析
+        org.apache.ibatis.builder.xml.XMLMapperBuilder.parse
+        -->
+        <mapper resource="org/apache/ibatis/submitted/nested_query_cache/AuthorMapper.xml"/>
+        <mapper resource="org/apache/ibatis/submitted/nested_query_cache/BlogMapper.xml"/>
+    </mappers>
+
+</configuration>
+
+
