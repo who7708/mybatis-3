@@ -34,12 +34,19 @@ import java.util.Set;
 public class MapperRegistry {
 
   private final Configuration config;
+  // 注册的全部 mapper
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<Class<?>, MapperProxyFactory<?>>();
 
   public MapperRegistry(Configuration config) {
     this.config = config;
   }
 
+  /**
+   * @param type       mapper 接口
+   * @param sqlSession {@link org.apache.ibatis.session.defaults.DefaultSqlSession}
+   * @param <T>        mapper 接口的动态代理对象
+   * @return 返回 mapper 接口的动态代理对象 jdk
+   */
   @SuppressWarnings("unchecked")
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
@@ -52,13 +59,15 @@ public class MapperRegistry {
       throw new BindingException("Error getting mapper instance. Cause: " + e, e);
     }
   }
-  
+
   public <T> boolean hasMapper(Class<T> type) {
     return knownMappers.containsKey(type);
   }
 
   public <T> void addMapper(Class<T> type) {
+    // 判断mapper是否为接口
     if (type.isInterface()) {
+      // 判断mapper是否已经注册过了
       if (hasMapper(type)) {
         throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
       }
@@ -104,5 +113,5 @@ public class MapperRegistry {
   public void addMappers(String packageName) {
     addMappers(packageName, Object.class);
   }
-  
+
 }
