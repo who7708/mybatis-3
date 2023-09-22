@@ -272,6 +272,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
           <testCompilerArgument>${maven.compiler.testCompilerArgument}</testCompilerArgument>
         </configuration>
       </plugin>
