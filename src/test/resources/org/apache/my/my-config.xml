@@ -151,6 +151,10 @@ org.apache.ibatis.builder.xml.XMLConfigBuilder.parseConfiguration
         -->
         <mapper resource="org/apache/ibatis/submitted/nested_query_cache/AuthorMapper.xml"/>
         <mapper resource="org/apache/ibatis/submitted/nested_query_cache/BlogMapper.xml"/>
+        <!--<mapper url=""/>-->
+        <!--<mapper class="org.apache.ibatis.submitted.nested_query_cache.AuthorMapper"/>-->
+        <!-- 如果 mapperJava 已经被加载过了，则会抛出异常 -->
+        <!--<package name="org.apache.ibatis.submitted.nested_query_cache"/>-->
     </mappers>
 
 </configuration>

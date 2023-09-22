@@ -88,9 +88,12 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   public void parse() {
+    // 判断 mapperXml 文件是否已经解析过了
     if (!configuration.isResourceLoaded(resource)) {
       configurationElement(parser.evalNode("/mapper"));
+      // 放入set中标记此mapperXml文件已经解析过了
       configuration.addLoadedResource(resource);
+      // mapperJava 与 mapperXml 进行绑定，如果 mapperJava 不存在，则将此mapperJava进行注册
       bindMapperForNamespace();
     }
 
@@ -110,11 +113,17 @@ public class XMLMapperBuilder extends BaseBuilder {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
       builderAssistant.setCurrentNamespace(namespace);
+      // 解析xml配置文件中的 mapper 下的 cache-ref 节点
       cacheRefElement(context.evalNode("cache-ref"));
+      // 解析xml配置文件中的 mapper 下的 cache 节点
       cacheElement(context.evalNode("cache"));
+      // 解析xml配置文件中的 mapper 下的 parameterMap 节点
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+      // 解析xml配置文件中的 mapper 下的 resultMap 节点
       resultMapElements(context.evalNodes("/mapper/resultMap"));
+      // 解析xml配置文件中的 mapper 下的 sql 节点
       sqlElement(context.evalNodes("/mapper/sql"));
+      // 解析xml配置文件中的 mapper 下的 select|insert|update|delete 节点
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
@@ -336,7 +345,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       }
     }
   }
-  
+
   private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
     if (requiredDatabaseId != null) {
       if (!requiredDatabaseId.equals(databaseId)) {
@@ -382,7 +391,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
     return builderAssistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect, nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
   }
-  
+
   private String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings) throws Exception {
     if ("association".equals(context.getName())
         || "collection".equals(context.getName())
@@ -395,6 +404,9 @@ public class XMLMapperBuilder extends BaseBuilder {
     return null;
   }
 
+  /**
+   * mapperJava 与 mapperXml 进行绑定，如果 mapperJava 不存在，则将此mapperJava进行注册
+   */
   private void bindMapperForNamespace() {
     String namespace = builderAssistant.getCurrentNamespace();
     if (namespace != null) {
