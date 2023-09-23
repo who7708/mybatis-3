@@ -5,7 +5,8 @@
 
 <mapper namespace="org.apache.my.nested_query_cache.AuthorMapper">
 
-  <cache readOnly="true" />
+  <!--<cache readOnly="true" />-->
+  <cache type="org.mybatis.caches.redis.RedisCache"/>
 
   <resultMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
     <id column="id" property="id" />
